@@ -22,16 +22,11 @@ const declineBtn = document.getElementById("decline-cookies-btn");
 const warnInfo = document.getElementById("warnInfo");
 
 let cart = [];
-let phone = OWNER_PHONE;
-let abertura = OWNER_ABERTURA;
-let encerramento = OWNER_FECHAMENTO;
+let phone = "";
+let abertura = "";
+let encerramento = "";
 let saveCookies = false;
 let aberto = false;
-
-// CONFIGURAÇÃO DO DONO (FIXO)
-const OWNER_PHONE = "5532999296404";
-const OWNER_ABERTURA = "17:00";
-const OWNER_FECHAMENTO = "00:00";
 
 // Formatar número de telefone
 function formatPhoneNumber(value) {
@@ -415,5 +410,6 @@ function showToast(message, backgroundColor) {
 }
 
 window.addEventListener("load", () => {
-    updateTime(abertura, encerramento);
+    loadOwnerConfig();
+    loadDataFromCookies();
 });
