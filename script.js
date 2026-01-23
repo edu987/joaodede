@@ -225,38 +225,32 @@ setInterval(updateRestaurantStatus, 15000);
 // ===============================
 if (cartItemsContainer) {
     cartItemsContainer.addEventListener("click", (e) => {
-        const button = e.target.closest("button");
-        if (!button) return;
+		const btn = e.target.closest("button");
+		if (!btn) return;
 
-        const name = button.dataset.name;
-        const item = cart.find(i => i.name === name);
-        if (!item) return;
+		const name = btn.dataset.name;
+		const item = cart.find(i => i.name === name);
+		if (!item) return;
 
-        // DIMINUIR QUANTIDADE
-        if (button.classList.contains("btn-remove")) {
-            if (item.quantity > 1) {
-                item.quantity--;
-            } else {
-                cart = cart.filter(i => i.name !== name);
-            }
-            updateCartModal();
-            return;
-        }
+		if (btn.classList.contains("btn-add")) {
+			item.quantity++;
+		}
 
-        // AUMENTAR QUANTIDADE
-        if (button.classList.contains("btn-add")) {
-            item.quantity++;
-            updateCartModal();
-            return;
-        }
+		if (btn.classList.contains("btn-remove")) {
+			if (item.quantity > 1) {
+				item.quantity--;
+			} else {
+				cart = cart.filter(i => i.name !== name);
+			}
+		}
 
-        // REMOVER ITEM
-        if (button.classList.contains("remove-cart-btn")) {
-            cart = cart.filter(i => i.name !== name);
-            updateCartModal();
-            return;
-        }
-    });
+		if (btn.classList.contains("remove-cart-btn")) {
+			cart = cart.filter(i => i.name !== name);
+		}
+
+		updateCartModal();
+	});
+
 }
 
 
@@ -271,14 +265,13 @@ if (cartBtn && cartModal) {
     });
 }
 
-if (cartModal) {
-    cartModal.addEventListener("click", (e) => {
-        if (e.target === cartModal || e.target === closeModal) {
-            cartModal.classList.add("hidden");
-            cartModal.classList.remove("flex");
-        }
-    });
-}
+cartModal.addEventListener("click", (e) => {
+    if (e.target.id === "cart-modal" || e.target.id === "close-modal-btn") {
+        cartModal.classList.add("hidden");
+        cartModal.classList.remove("flex");
+    }
+});
+
 
 if (menu) {
     menu.addEventListener("click", (e) => {
