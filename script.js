@@ -36,7 +36,7 @@ const warnInfo = document.getElementById("warnInfo");
 // ===============================
 // CONFIGURAÇÃO FIXA DO RESTAURANTE
 // ===============================
-const OWNER_PHONE = "5532988566505";
+const OWNER_PHONE = "5532999296404";
 const OWNER_ABERTURA = "17:00";
 const OWNER_FECHAMENTO = "00:00";
 
