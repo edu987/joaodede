@@ -255,24 +255,45 @@ function addToCart(name, price) {
 }
 
 function updateCartModal() {
-    if (!cartItemsContainer) return;
-
     cartItemsContainer.innerHTML = "";
     let total = 0;
 
     cart.forEach(item => {
-        total += item.price * item.quantity;
-        cartItemsContainer.insertAdjacentHTML("beforeend", `
-            <div class="flex justify-between p-4">
-                <div>${item.name} (${item.quantity})</div>
-                <button class="remove-cart-btn" data-name="${item.name}">Remover</button>
+        const cartItemElement = document.createElement("div");
+        cartItemElement.className = "border-b border-gray-300 pb-3 mb-3";
+
+        cartItemElement.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-bold">${item.name}</p>
+
+                    <div class="flex items-center gap-2 mt-2">
+                        <button class="btn-remove bg-red-500 text-white w-8 h-8 rounded-full" data-name="${item.name}">-</button>
+                        <span class="font-bold">${item.quantity}</span>
+                        <button class="btn-add bg-red-500 text-white w-8 h-8 rounded-full" data-name="${item.name}">+</button>
+                    </div>
+
+                    <p class="mt-2">Preço: R$ ${item.price.toFixed(2)}</p>
+                </div>
+
+                <button class="remove-cart-btn bg-red-500 text-white px-3 py-1 rounded" data-name="${item.name}">
+                    Remover
+                </button>
             </div>
-        `);
+        `;
+
+        total += item.price * item.quantity;
+        cartItemsContainer.appendChild(cartItemElement);
     });
 
-    if (cartTotal) cartTotal.textContent = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    if (cartCounter) cartCounter.textContent = cart.length;
+    cartTotal.textContent = total.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    cartCounter.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
 }
+
 
 if (checkoutBtn) {
     checkoutBtn.addEventListener("click", () => {
