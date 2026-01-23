@@ -287,29 +287,45 @@ function addToCart(name, price) {
     updateCartModal();
 }
 
+// Atualiza o modal do carrinho
 function updateCartModal() {
     cartItemsContainer.innerHTML = "";
     let total = 0;
 
     cart.forEach(item => {
         const cartItemElement = document.createElement("div");
-        cartItemElement.className = "border-b border-gray-300 pb-3 mb-3";
 
         cartItemElement.innerHTML = `
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center border-black p-4 border-b">
                 <div>
-                    <p class="font-bold">${item.name}</p>
+                    <div class="font-bold">Nome do item:</div>
+                    <div class="font-sans">${item.name}</div>
 
-                    <div class="flex items-center gap-2 mt-2">
-                        <button class="btn-remove bg-red-500 text-white w-8 h-8 rounded-full" data-name="${item.name}">-</button>
-                        <span class="font-bold">${item.quantity}</span>
-                        <button class="btn-add bg-red-500 text-white w-8 h-8 rounded-full" data-name="${item.name}">+</button>
+                    <p class="font-bold mt-2">Quantidade:</p>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            class="btn-remove bg-red-500 text-white px-2 py-1 hover:bg-red-600 rounded-full" 
+                            data-name="${item.name}">
+                            -
+                        </button>
+
+                        <span class="font-sans">${item.quantity}</span>
+
+                        <button 
+                            class="btn-add bg-red-500 text-white px-2 py-1 hover:bg-red-600 rounded-full" 
+                            data-name="${item.name}">
+                            +
+                        </button>
                     </div>
 
-                    <p class="mt-2">Preço: R$ ${item.price.toFixed(2)}</p>
+                    <div class="font-bold mt-2">
+                        Preço: <span class="font-sans">R$ ${item.price.toFixed(2)}</span>
+                    </div>
                 </div>
 
-                <button class="remove-cart-btn bg-red-500 text-white px-3 py-1 rounded" data-name="${item.name}">
+                <button 
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 remove-cart-btn" 
+                    data-name="${item.name}">
                     Remover
                 </button>
             </div>
@@ -324,8 +340,11 @@ function updateCartModal() {
         currency: "BRL"
     });
 
-    cartCounter.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
+    cartCounter.textContent = cart.length;
+
+    bindCartButtons(); // 🔥 garante funcionamento dos botões
 }
+
 
 
 if (checkoutBtn) {
