@@ -21,10 +21,16 @@ const acceptBtn = document.getElementById("accept-cookies-btn");
 const declineBtn = document.getElementById("decline-cookies-btn");
 const warnInfo = document.getElementById("warnInfo");
 
+// CONFIGURAÇÃO DO DONO (FIXO)
+const OWNER_PHONE = "5532988566505";
+const OWNER_ABERTURA = "17:00";
+const OWNER_FECHAMENTO = "00:00";
+
+
 let cart = [];
-let phone = "";
-let abertura = "";
-let encerramento = "";
+let phone = OWNER_PHONE;
+let abertura = OWNER_ABERTURA;
+let encerramento = OWNER_FECHAMENTO;
 let saveCookies = false;
 let aberto = false;
 
@@ -410,6 +416,5 @@ function showToast(message, backgroundColor) {
 }
 
 window.addEventListener("load", () => {
-    loadOwnerConfig();
-    loadDataFromCookies();
+    updateTime(abertura, encerramento);
 });
