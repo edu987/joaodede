@@ -74,36 +74,6 @@ function saveOwnerConfig() {
     updateRestaurantStatus();
 }
 
-function bindCartButtons() {
-    document.querySelectorAll(".btn-add").forEach(btn => {
-        btn.onclick = () => {
-            const item = cart.find(i => i.name === btn.dataset.name);
-            if (item) {
-                item.quantity++;
-                updateCartModal();
-            }
-        };
-    });
-
-    document.querySelectorAll(".btn-remove").forEach(btn => {
-        btn.onclick = () => {
-            const item = cart.find(i => i.name === btn.dataset.name);
-            if (item && item.quantity > 1) {
-                item.quantity--;
-                updateCartModal();
-            }
-        };
-    });
-
-    document.querySelectorAll(".remove-cart-btn").forEach(btn => {
-        btn.onclick = () => {
-            cart = cart.filter(i => i.name !== btn.dataset.name);
-            updateCartModal();
-        };
-    });
-}
-
-
 // ===============================
 // EVENTOS DO MODAL INFO
 // ===============================
@@ -401,3 +371,37 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalInfo) modalInfo.classList.add("hidden");
     updateTime();
 });
+
+// ===============================
+// BIND DOS BOTÕES DO CARRINHO
+// ===============================
+function bindCartButtons() {
+
+    document.querySelectorAll(".btn-add").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const item = cart.find(i => i.name === btn.dataset.name);
+            if (item) {
+                item.quantity++;
+                updateCartModal();
+            }
+        });
+    });
+
+    document.querySelectorAll(".btn-remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const item = cart.find(i => i.name === btn.dataset.name);
+            if (item && item.quantity > 1) {
+                item.quantity--;
+                updateCartModal();
+            }
+        });
+    });
+
+    document.querySelectorAll(".remove-cart-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            cart = cart.filter(i => i.name !== btn.dataset.name);
+            updateCartModal();
+        });
+    });
+}
+
