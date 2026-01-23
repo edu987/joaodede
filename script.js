@@ -14,20 +14,29 @@ const encerramentoHeader = document.getElementById("fechamento");
 const banner = document.getElementById("cookie-banner");
 const acceptBtn = document.getElementById("accept-cookies-btn");
 const declineBtn = document.getElementById("decline-cookies-btn");
+const telefone = document.getElementById("telefone");
+const aberturaInfo = document.getElementById("abertura-info");
+const fechamentoInfo = document.getElementById("fechamento-info");
+const warnInfo = document.getElementById("warn-info");
+const btnInfo = document.getElementById("btn-info");
+const modalInfo = document.getElementById("modal-info");
 
 
-// CONFIGURAÇÃO DO DONO (FIXO)
-const OWNER_PHONE = "5532988566505";
+
+// CONFIGURAÇÃO FIXA DO RESTAURANTE
+const OWNER_PHONE = "5532999296404";
 const OWNER_ABERTURA = "17:00";
 const OWNER_FECHAMENTO = "00:00";
 
-
-let cart = [];
+// VARIÁVEIS GLOBAIS USADAS PELO SISTEMA
 let phone = OWNER_PHONE;
 let abertura = OWNER_ABERTURA;
-let encerramento = OWNER_FECHAMENTO;
+let fechamento = OWNER_FECHAMENTO;
+
+let cart = [];
 let saveCookies = false;
 let aberto = false;
+
 
 // Formatar número de telefone
 function formatPhoneNumber(value) {
@@ -42,6 +51,12 @@ function isValidPhone(phone) {
     const phoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/; 
     return phoneRegex.test(phone); 
 }
+
+function saveOwnerConfig() {
+    updateTime();
+    updateRestaurantStatus();
+}
+
 
 // Formatar telefone enquanto digita
 telefone.addEventListener("input", (event) => {
@@ -81,32 +96,13 @@ btnInfo.addEventListener("click", () => {
 
     console.log("Se você esta vendo isso, Obrigado por testar meu projeto! ;)");
     abertura = aberturaInfo.value.trim();
-    encerramento = fechamentoInfo.value.trim();
+    fechamento = fechamentoInfo.value.trim();
     phone = removeFormatting(telefone.value);
     
-    updateTime(abertura, encerramento);
+    updateTime();
     saveOwnerConfig();
     modalInfo.classList.add("hidden");
 });
-
-function loadOwnerConfig() {
-    const savedPhone = localStorage.getItem("ownerPhone");
-    const savedAbertura = localStorage.getItem("ownerAbertura");
-    const savedEncerramento = localStorage.getItem("ownerEncerramento");
-
-    if (savedPhone && savedAbertura && savedEncerramento) {
-        phone = savedPhone;
-        abertura = savedAbertura;
-        encerramento = savedEncerramento;
-
-        updateTime(abertura, encerramento);
-        modalInfo.classList.add("hidden");
-        return true;
-    }
-
-    modalInfo.classList.remove("hidden");
-    return false;
-}
 
 
 //remover os caracteres que não precisa
@@ -142,7 +138,7 @@ function saveDataToCookies() {
     try {
         if (phone) setCookie('phone', phone, 1);
         if (abertura) setCookie('abertura', abertura, 1);
-        if (encerramento) setCookie('encerramento', encerramento, 1);
+        if (fechamento) setCookie('fechamento', fechamento, 1);
     } catch (error) {
         console.error("Erro ao salvar cookies:", error);
     }
@@ -154,7 +150,7 @@ function loadDataFromCookies() {
 
     const savedPhone = getCookie('phone') || "";
     const savedAbertura = getCookie('abertura') || "00:00";
-    const savedEncerramento = getCookie('encerramento') || "00:00";
+    const savedEncerramento = getCookie('fechamento') || "00:00";
 
     const FPhone = formatPhoneNumber(savedPhone);
 
@@ -174,28 +170,11 @@ function getCookie(name) {
     return null;
 }
 
-// Atualizar horários no header
-function updateTime(abertura, encerramento) {
+function updateTime() {
     aberturaHeader.textContent = abertura;
-    encerramentoHeader.textContent = encerramento;
-    updateRestaurantStatus();
+    encerramentoHeader.textContent = fechamento;
 }
 
-function saveOwnerConfig() {
-    if (!isValidPhone(telefone.value)) return;
-    if (!aberturaInfo.value || !fechamentoInfo.value) return;
-
-    phone = "55" + removeFormatting(telefone.value);
-    abertura = aberturaInfo.value;
-    encerramento = fechamentoInfo.value;
-
-    localStorage.setItem("ownerPhone", phone);
-    localStorage.setItem("ownerAbertura", abertura);
-    localStorage.setItem("ownerEncerramento", encerramento);
-
-    updateTime(abertura, encerramento);
-    modalInfo.classList.add("hidden");
-}
 
 telefone.addEventListener("input", saveOwnerConfig);
 aberturaInfo.addEventListener("change", saveOwnerConfig);
@@ -205,23 +184,22 @@ fechamentoInfo.addEventListener("change", saveOwnerConfig);
 // Atualizar status de aberto/fechado
 function updateRestaurantStatus() {
     const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const agoraMin = now.getHours() * 60 + now.getMinutes();
 
-    const [openHour, openMinute] = abertura.split(':').map(Number);
-    const [closeHour, closeMinute] = encerramento.split(':').map(Number);
+    const [ah, am] = abertura.split(":").map(Number);
+    const [fh, fm] = fechamento.split(":").map(Number);
 
-    const openTime = openHour * 60 + openMinute;
-    const closeTime = closeHour * 60 + closeMinute;
+    const aberturaMin = ah * 60 + am;
+    const fechamentoMin = fh * 60 + fm;
 
     const spanItem = document.getElementById("date-span");
 
-    if (currentTime >= openTime && currentTime < closeTime) {
+    aberto = restauranteAberto(agoraMin, aberturaMin, fechamentoMin);
+
+    if (aberto) {
         spanItem.classList.replace("bg-red-500", "bg-green-600");
-        aberto = true;
     } else {
         spanItem.classList.replace("bg-green-600", "bg-red-500");
-
-        aberto=false;
     }
 }
 
@@ -334,38 +312,22 @@ function removeItemCart(name) {
     }
 }
 
-function restauranteAberto(agora, abertura, fechamento) {
-    if (fechamento > abertura) {
-        return agora >= abertura && agora <= fechamento;
+function restauranteAberto(agoraMin, aberturaMin, fechamentoMin) {
+    if (fechamentoMin > aberturaMin) {
+        return agoraMin >= aberturaMin && agoraMin < fechamentoMin;
     } else {
-        // fecha depois da meia-noite
-        return agora >= abertura || agora <= fechamento;
+        // Fecha depois da meia-noite
+        return agoraMin >= aberturaMin || agoraMin < fechamentoMin;
     }
 }
+
 
 
 // Finaliza a compra
 checkoutBtn.addEventListener("click", () => {
 
-    const abertura = localStorage.getItem("ownerAbertura");
-    const fechamento = localStorage.getItem("ownerEncerramento");
-
-    if (!abertura || !fechamento) {
-        showToast("Horário do restaurante não configurado", "#ef4444");
-        return;
-    }
-
-    const agora = new Date();
-    const agoraMin = agora.getHours() * 60 + agora.getMinutes();
-
-    const [ah, am] = abertura.split(":").map(Number);
-    const [fh, fm] = fechamento.split(":").map(Number);
-
-    const aberturaMin = ah * 60 + am;
-    const fechamentoMin = fh * 60 + fm;
-
-    if (!restauranteAberto(agoraMin, aberturaMin, fechamentoMin)) {
-        showToast("Restaurante fechado", "#ef4444");
+    if (!aberto) {
+        showToast("⛔ Restaurante fechado no momento", "#ef4444");
         return;
     }
 
@@ -375,27 +337,33 @@ checkoutBtn.addEventListener("click", () => {
         return;
     }
 
-    addressWarn.classList.add("hidden");
-    const total = cartTotal.textContent;
-    const cartItems = cart.map(item => `${item.name} \n quantidade: ${item.quantity} \n R$ ${item.price.toFixed(2)} \n -------------------`).join("\n");
-    const message = encodeURIComponent(`${cartItems} \n Total: ${total} \n Adicionais: ${addressInput.value}`);
-
     if (phone === "") {
-        addressWarn.textContent = "Numero de telefone Esta vazio";
+        addressWarn.textContent = "Número do WhatsApp não configurado!";
         addressWarn.classList.remove("hidden");
         return;
-    } else {
-        addressWarn.classList.add("hidden");
     }
 
-    window.open(`https://wa.me/${phone}/?text=${message}`, "_blank");
-    cart = []; 
-    addressInput.value = ""; 
-    updateCartModal(); 
+    addressWarn.classList.add("hidden");
+
+    const total = cartTotal.textContent;
+    const cartItems = cart.map(item =>
+        `${item.name}\nQtd: ${item.quantity}\nR$ ${item.price.toFixed(2)}\n---`
+    ).join("\n");
+
+    const message = encodeURIComponent(
+        `${cartItems}\nTotal: ${total}\nObservações: ${addressInput.value}`
+    );
+
+    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+
+    cart = [];
+    addressInput.value = "";
+    updateCartModal();
 
     checkoutBtn.disabled = true;
-    setTimeout(() => (checkoutBtn.disabled = false), 3000);
+    setTimeout(() => checkoutBtn.disabled = false, 3000);
 });
+
 
 // Exibe notificações (toast)
 function showToast(message, backgroundColor) {
@@ -418,6 +386,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-window.addEventListener("load", () => {
-    updateTime(abertura, encerramento);
-});
+window.addEventListener("load", updateTime);
+
