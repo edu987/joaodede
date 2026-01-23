@@ -26,11 +26,12 @@ const banner = document.getElementById("cookie-banner");
 const acceptBtn = document.getElementById("accept-cookies-btn");
 const declineBtn = document.getElementById("decline-cookies-btn");
 const telefone = document.getElementById("telefone");
-const aberturaInfo = document.getElementById("abertura-info");
-const fechamentoInfo = document.getElementById("fechamento-info");
-const warnInfo = document.getElementById("warn-info");
 const btnInfo = document.getElementById("btn-info");
 const modalInfo = document.getElementById("modal-info");
+const aberturaInfo = document.getElementById("time-abertura");
+const fechamentoInfo = document.getElementById("time-fechamento");
+const warnInfo = document.getElementById("warnInfo");
+
 
 // ===============================
 // CONFIGURAÇÃO FIXA DO RESTAURANTE
