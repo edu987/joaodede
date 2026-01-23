@@ -163,19 +163,28 @@ function saveDataToCookies() {
 function loadDataFromCookies() {
     if (!saveCookies) return;
 
-    const p = getCookie("phone");
-    const a = getCookie("abertura");
-    const f = getCookie("fechamento");
+    const savedPhone = getCookie('phone') || "";
+    const savedAbertura = getCookie('abertura') || "";
+    const savedEncerramento = getCookie('fechamento') || "";
 
-    if (telefone && p && !telefone.value) telefone.value = formatPhoneNumber(p);
-    if (aberturaInfo && a && !aberturaInfo.value) aberturaInfo.value = a;
-    if (fechamentoInfo && f && !fechamentoInfo.value) fechamentoInfo.value = f;
+    if (telefone && savedPhone && telefone.value.trim() === "") {
+        telefone.value = formatPhoneNumber(savedPhone);
+    }
 
-    if (a) abertura = a;
-    if (f) fechamento = f;
+    if (aberturaInfo && savedAbertura && aberturaInfo.value.trim() === "") {
+        aberturaInfo.value = savedAbertura;
+        abertura = savedAbertura;
+    }
 
-    saveOwnerConfig();
+    if (fechamentoInfo && savedEncerramento && fechamentoInfo.value.trim() === "") {
+        fechamentoInfo.value = savedEncerramento;
+        fechamento = savedEncerramento;
+    }
+
+    updateTime();
+    updateRestaurantStatus();
 }
+
 
 // ===============================
 // HORÁRIO
