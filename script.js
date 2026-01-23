@@ -1,4 +1,15 @@
-// Referências DOM
+// ===============================
+// LIMPA CONSOLE EM PRODUÇÃO (GITHUB)
+// ===============================
+if (location.hostname.includes("github.io")) {
+    console.log = function () {};
+    console.warn = function () {};
+    console.error = function () {};
+}
+
+// ===============================
+// REFERÊNCIAS DOM
+// ===============================
 const menu = document.getElementById("menu");
 const cartBtn = document.getElementById("cart-btn");
 const cartModal = document.getElementById("cart-modal");
@@ -21,14 +32,16 @@ const warnInfo = document.getElementById("warn-info");
 const btnInfo = document.getElementById("btn-info");
 const modalInfo = document.getElementById("modal-info");
 
-
-
+// ===============================
 // CONFIGURAÇÃO FIXA DO RESTAURANTE
-const OWNER_PHONE = "5532999296404";
+// ===============================
+const OWNER_PHONE = "5532988566505";
 const OWNER_ABERTURA = "17:00";
 const OWNER_FECHAMENTO = "00:00";
 
-// VARIÁVEIS GLOBAIS USADAS PELO SISTEMA
+// ===============================
+// VARIÁVEIS GLOBAIS
+// ===============================
 let phone = OWNER_PHONE;
 let abertura = OWNER_ABERTURA;
 let fechamento = OWNER_FECHAMENTO;
@@ -37,8 +50,9 @@ let cart = [];
 let saveCookies = false;
 let aberto = false;
 
-
-// Formatar número de telefone
+// ===============================
+// FUNÇÕES UTILITÁRIAS
+// ===============================
 function formatPhoneNumber(value) {
     let formattedPhone = value.replace(/\D/g, '');
     if (formattedPhone.length >= 2) formattedPhone = formattedPhone.replace(/(\d{2})(\d+)/, '($1) $2');
@@ -46,10 +60,12 @@ function formatPhoneNumber(value) {
     return formattedPhone;
 }
 
-// Função para validar o telefone no formato (XX) XXXXX-XXXX
 function isValidPhone(phone) {
-    const phoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/; 
-    return phoneRegex.test(phone); 
+    return /^\(\d{2}\) \d{5}-\d{4}$/.test(phone);
+}
+
+function removeFormatting(phoneNumber) {
+    return phoneNumber.replace(/\D/g, '');
 }
 
 function saveOwnerConfig() {
@@ -57,28 +73,32 @@ function saveOwnerConfig() {
     updateRestaurantStatus();
 }
 
+// ===============================
+// EVENTOS DO MODAL INFO
+// ===============================
+if (telefone) {
+    telefone.addEventListener("input", (e) => {
+        telefone.value = formatPhoneNumber(e.target.value);
+        saveOwnerConfig();
+    });
+}
 
-// Formatar telefone enquanto digita
-telefone.addEventListener("input", (event) => {
-    telefone.value = formatPhoneNumber(event.target.value);
-    saveOwnerConfig();
-});
-
-// Verificar dados antes de salvar
 function checkInfo() {
+    if (!telefone || !aberturaInfo || !fechamentoInfo || !warnInfo) return true;
+
     if (!isValidPhone(telefone.value)) {
-        warnInfo.textContent = "Número de telefone inválido! Use o formato (XX) XXXXX-XXXX.";
+        warnInfo.textContent = "Número de telefone inválido!";
         warnInfo.classList.remove("hidden");
         return false;
     }
 
-    if (!aberturaInfo.value || aberturaInfo.value.trim() === "") {
+    if (!aberturaInfo.value.trim()) {
         warnInfo.textContent = "Preencha o horário de abertura!";
         warnInfo.classList.remove("hidden");
         return false;
     }
 
-    if (!fechamentoInfo.value || fechamentoInfo.value.trim() === "") {
+    if (!fechamentoInfo.value.trim()) {
         warnInfo.textContent = "Preencha o horário de fechamento!";
         warnInfo.classList.remove("hidden");
         return false;
@@ -88,303 +108,183 @@ function checkInfo() {
     return true;
 }
 
-// Salvar horário e telefone no cookie
-btnInfo.addEventListener("click", () => {
-    if (!checkInfo()) {
-        return;
-    }
+if (btnInfo) {
+    btnInfo.addEventListener("click", () => {
+        if (!checkInfo()) return;
 
-    console.log("Se você esta vendo isso, Obrigado por testar meu projeto! ;)");
-    abertura = aberturaInfo.value.trim();
-    fechamento = fechamentoInfo.value.trim();
-    phone = removeFormatting(telefone.value);
-    
-    updateTime();
-    saveOwnerConfig();
-    modalInfo.classList.add("hidden");
-});
+        abertura = aberturaInfo.value.trim();
+        fechamento = fechamentoInfo.value.trim();
+        phone = removeFormatting(telefone.value);
 
-
-//remover os caracteres que não precisa
-function removeFormatting(phoneNumber) {
-    return phoneNumber.replace(/\D/g, ''); 
+        saveOwnerConfig();
+        if (modalInfo) modalInfo.classList.add("hidden");
+    });
 }
 
-// Mostrar ou esconder banner de cookies
-banner.classList.remove("translate-y-full");
+// ===============================
+// COOKIES
+// ===============================
+if (banner) banner.classList.remove("translate-y-full");
 
-acceptBtn.addEventListener("click", () => {
-    saveCookies = true;
-    loadDataFromCookies();
-    saveDataToCookies();
-    banner.classList.add("hidden");
-});
+if (acceptBtn) {
+    acceptBtn.addEventListener("click", () => {
+        saveCookies = true;
+        loadDataFromCookies();
+        saveDataToCookies();
+        banner.classList.add("hidden");
+    });
+}
 
-declineBtn.addEventListener("click", () => {
-    saveCookies = false;
-    banner.classList.add("hidden");
-});
+if (declineBtn) {
+    declineBtn.addEventListener("click", () => {
+        saveCookies = false;
+        banner.classList.add("hidden");
+    });
+}
 
-// Função para definir cookies
 function setCookie(name, value, days) {
     const d = new Date();
-    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + d.toUTCString();
-    document.cookie = `${name}=${value}; ${expires}; path=/`;
+    d.setTime(d.getTime() + (days * 86400000));
+    document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/`;
 }
 
-// Salvar dados no cookie
-function saveDataToCookies() {
-    try {
-        if (phone) setCookie('phone', phone, 1);
-        if (abertura) setCookie('abertura', abertura, 1);
-        if (fechamento) setCookie('fechamento', fechamento, 1);
-    } catch (error) {
-        console.error("Erro ao salvar cookies:", error);
-    }
-}
-
-// Carregar dados dos cookies
-function loadDataFromCookies() {
-    if (!saveCookies) return; 
-
-    const savedPhone = getCookie('phone') || "";
-    const savedAbertura = getCookie('abertura') || "00:00";
-    const savedEncerramento = getCookie('fechamento') || "00:00";
-
-    const FPhone = formatPhoneNumber(savedPhone);
-
-    if (savedPhone && telefone.value.trim() === "") telefone.value = FPhone;
-    if (savedAbertura && aberturaInfo.value.trim() === "") aberturaInfo.value = savedAbertura;
-    if (savedEncerramento && fechamentoInfo.value.trim() === "") fechamentoInfo.value = savedEncerramento;
-}
-
-// Obter valor do cookie
 function getCookie(name) {
     const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i].trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
+    return document.cookie.split(";").map(c => c.trim()).find(c => c.startsWith(nameEQ))?.substring(nameEQ.length) || null;
 }
 
+function saveDataToCookies() {
+    if (!saveCookies) return;
+    if (phone) setCookie("phone", phone, 1);
+    if (abertura) setCookie("abertura", abertura, 1);
+    if (fechamento) setCookie("fechamento", fechamento, 1);
+}
+
+function loadDataFromCookies() {
+    if (!saveCookies) return;
+
+    const p = getCookie("phone");
+    const a = getCookie("abertura");
+    const f = getCookie("fechamento");
+
+    if (telefone && p && !telefone.value) telefone.value = formatPhoneNumber(p);
+    if (aberturaInfo && a && !aberturaInfo.value) aberturaInfo.value = a;
+    if (fechamentoInfo && f && !fechamentoInfo.value) fechamentoInfo.value = f;
+
+    if (a) abertura = a;
+    if (f) fechamento = f;
+
+    saveOwnerConfig();
+}
+
+// ===============================
+// HORÁRIO
+// ===============================
 function updateTime() {
-    aberturaHeader.textContent = abertura;
-    encerramentoHeader.textContent = fechamento;
+    if (aberturaHeader) aberturaHeader.textContent = abertura;
+    if (encerramentoHeader) encerramentoHeader.textContent = fechamento;
 }
 
+function restauranteAberto(agora, abre, fecha) {
+    return fecha > abre
+        ? agora >= abre && agora < fecha
+        : agora >= abre || agora < fecha;
+}
 
-telefone.addEventListener("input", saveOwnerConfig);
-aberturaInfo.addEventListener("change", saveOwnerConfig);
-fechamentoInfo.addEventListener("change", saveOwnerConfig);
-
-
-// Atualizar status de aberto/fechado
 function updateRestaurantStatus() {
+    const span = document.getElementById("date-span");
+    if (!span) return;
+
     const now = new Date();
-    const agoraMin = now.getHours() * 60 + now.getMinutes();
+    const agora = now.getHours() * 60 + now.getMinutes();
 
     const [ah, am] = abertura.split(":").map(Number);
     const [fh, fm] = fechamento.split(":").map(Number);
 
-    const aberturaMin = ah * 60 + am;
-    const fechamentoMin = fh * 60 + fm;
+    aberto = restauranteAberto(agora, ah * 60 + am, fh * 60 + fm);
 
-    const spanItem = document.getElementById("date-span");
-
-    aberto = restauranteAberto(agoraMin, aberturaMin, fechamentoMin);
-
-    if (aberto) {
-        spanItem.classList.replace("bg-red-500", "bg-green-600");
-    } else {
-        spanItem.classList.replace("bg-green-600", "bg-red-500");
-    }
+    span.classList.toggle("bg-green-600", aberto);
+    span.classList.toggle("bg-red-500", !aberto);
 }
 
 updateRestaurantStatus();
 setInterval(updateRestaurantStatus, 15000);
 
+// ===============================
+// CARRINHO
+// ===============================
+if (cartBtn && cartModal) {
+    cartBtn.addEventListener("click", () => {
+        cartModal.classList.remove("hidden");
+        cartModal.classList.add("flex");
+        updateCartModal();
+    });
+}
 
-// Abre o modal do carrinho
-cartBtn.addEventListener("click", () => {
-    cartModal.classList.remove("hidden");
-    cartModal.classList.add("flex");
-    updateCartModal();
-});
+if (cartModal) {
+    cartModal.addEventListener("click", (e) => {
+        if (e.target === cartModal || e.target === closeModal) {
+            cartModal.classList.add("hidden");
+            cartModal.classList.remove("flex");
+        }
+    });
+}
 
+if (menu) {
+    menu.addEventListener("click", (e) => {
+        const btn = e.target.closest(".add-to-cart-btn");
+        if (!btn) return;
+        addToCart(btn.dataset.name, parseFloat(btn.dataset.price));
+    });
+}
 
-// Fecha o modal do carrinho
-cartModal.addEventListener("click", (event) => {
-    if (event.target === cartModal || event.target === closeModal) {
-        cartModal.classList.add("hidden");
-        cartModal.classList.remove("flex");
-    }
-});
-
-
-// Adiciona item ao carrinho
-menu.addEventListener("click", (event) => {
-    const parentButton = event.target.closest(".add-to-cart-btn");
-    if (parentButton) {
-        const name = parentButton.getAttribute("data-name");
-        const price = parseFloat(parentButton.getAttribute("data-price"));
-        addToCart(name, price);
-    }
-});
-
-// Função para adicionar item ao carrinho
 function addToCart(name, price) {
-    const existingItem = cart.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.quantity += 1; 
-    } else {
-        cart.push({ name, price, quantity: 1 }); 
-    }
+    const item = cart.find(i => i.name === name);
+    item ? item.quantity++ : cart.push({ name, price, quantity: 1 });
     updateCartModal();
 }
 
-// Atualiza o modal do carrinho
 function updateCartModal() {
-    cartItemsContainer.innerHTML = ""; 
+    if (!cartItemsContainer) return;
+
+    cartItemsContainer.innerHTML = "";
     let total = 0;
 
     cart.forEach(item => {
-        const cartItemElement = document.createElement("div");
-        cartItemElement.innerHTML = `
-           <div class="flex justify-between items-center border-black p-4">
-    <div>
-        <div class="font-bold">Nome do item:</div>
-        <div class="font-sans">${item.name}</div>
-        <div class="font-bold">
-        <p class="font-bold">Quantidade:</p> 
-        <button class=" btn-remove bg-red-500 text-white px-2 py-1 hover:bg-red-600 rounded-full" data-name="${item.name}">
-         -
-         </button>
-        <span class="font-sans">${item.quantity}</span>
-        <button class="btn-add bg-red-500 text-white px-2 py-1 hover:bg-red-600 rounded-full" data-name="${item.name}">
-         +
-         </button>
-        </div>
-        <div class="font-bold">Preço: <span class="font-sans">${item.price.toFixed(2)}</span></div>
-    </div>
-    <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 remove-cart-btn" data-name="${item.name}">
-        Remover
-    </button>
-</div>
-
-        `;
-        total += item.price * item.quantity; 
-        cartItemsContainer.appendChild(cartItemElement);
+        total += item.price * item.quantity;
+        cartItemsContainer.insertAdjacentHTML("beforeend", `
+            <div class="flex justify-between p-4">
+                <div>${item.name} (${item.quantity})</div>
+                <button class="remove-cart-btn" data-name="${item.name}">Remover</button>
+            </div>
+        `);
     });
 
-    cartTotal.textContent = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    cartCounter.textContent = cart.length; 
+    if (cartTotal) cartTotal.textContent = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    if (cartCounter) cartCounter.textContent = cart.length;
 }
 
-// Remove item do carrinho
-cartItemsContainer.addEventListener("click", (event) => {
-    const name = event.target.getAttribute("data-name");
-    
-    if (event.target.classList.contains("remove-cart-btn")) {
-        const index = cart.findIndex(item => item.name === name);
-        cart.splice(index, 1);
+if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", () => {
+        if (!aberto) return showToast("⛔ Restaurante fechado", "#ef4444");
+        if (!cart.length) return;
+        window.open(`https://wa.me/${phone}`, "_blank");
+        cart = [];
         updateCartModal();
-    }
-
-    if (event.target.classList.contains("btn-remove")) {
-        removeItemCart(name);
-    }
-
-    if (event.target.classList.contains("btn-add")) {
-        addToCart(name);
-    }
-});
-
-// Função para remover item do carrinho
-function removeItemCart(name) {
-    const index = cart.findIndex(item => item.name === name);
-    if (index !== -1) {
-        const item = cart[index];
-        item.quantity > 1 ? item.quantity-- : cart.splice(index, 1);
-        updateCartModal();
-    }
+    });
 }
 
-function restauranteAberto(agoraMin, aberturaMin, fechamentoMin) {
-    if (fechamentoMin > aberturaMin) {
-        return agoraMin >= aberturaMin && agoraMin < fechamentoMin;
-    } else {
-        // Fecha depois da meia-noite
-        return agoraMin >= aberturaMin || agoraMin < fechamentoMin;
-    }
+// ===============================
+// TOAST
+// ===============================
+function showToast(text, bg) {
+    Toastify({ text, duration: 3000, style: { background: bg } }).showToast();
 }
 
-
-
-// Finaliza a compra
-checkoutBtn.addEventListener("click", () => {
-
-    if (!aberto) {
-        showToast("⛔ Restaurante fechado no momento", "#ef4444");
-        return;
-    }
-
-    if (cart.length === 0) {
-        addressWarn.textContent = "Carrinho está vazio!";
-        addressWarn.classList.remove("hidden");
-        return;
-    }
-
-    if (phone === "") {
-        addressWarn.textContent = "Número do WhatsApp não configurado!";
-        addressWarn.classList.remove("hidden");
-        return;
-    }
-
-    addressWarn.classList.add("hidden");
-
-    const total = cartTotal.textContent;
-    const cartItems = cart.map(item =>
-        `${item.name}\nQtd: ${item.quantity}\nR$ ${item.price.toFixed(2)}\n---`
-    ).join("\n");
-
-    const message = encodeURIComponent(
-        `${cartItems}\nTotal: ${total}\nObservações: ${addressInput.value}`
-    );
-
-    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-
-    cart = [];
-    addressInput.value = "";
-    updateCartModal();
-
-    checkoutBtn.disabled = true;
-    setTimeout(() => checkoutBtn.disabled = false, 3000);
-});
-
-
-// Exibe notificações (toast)
-function showToast(message, backgroundColor) {
-    Toastify({
-        text: message,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        stopOnFocus: true,
-        style: { background: backgroundColor },
-    }).showToast();
-}
-
-// Garante que o modal nunca apareça
+// ===============================
+// GARANTE MODAL INFO FECHADO
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
-    const modalInfo = document.getElementById("modal-info");
-    if (modalInfo) {
-        modalInfo.classList.add("hidden");
-    }
+    if (modalInfo) modalInfo.classList.add("hidden");
+    updateTime();
 });
-
-window.addEventListener("load", updateTime);
-
