@@ -345,13 +345,36 @@ function updateCartModal() {
     bindCartButtons(); // 🔥 garante funcionamento dos botões
 }
 
+function gerarMensagemPedido() {
+    let mensagem = "🍔 *PEDIDO DO SITE* 🍔\n\n";
+    let total = 0;
+
+    cart.forEach(item => {
+        mensagem += `*${item.name}*\n`;
+        mensagem += `Quantidade: ${item.quantity}\n`;
+        mensagem += `R$ ${(item.price * item.quantity).toFixed(2)}\n`;
+        mensagem += "-------------------\n";
+        total += item.price * item.quantity;
+    });
+
+    mensagem += `\n*Total:* R$ ${total.toFixed(2)}\n`;
+
+    const obs = document.getElementById("observacao");
+    if (obs && obs.value.trim() !== "") {
+        mensagem += `\n*Adicionais:* ${obs.value}`;
+    }
+
+    return encodeURIComponent(mensagem);
+}
 
 
 if (checkoutBtn) {
     checkoutBtn.addEventListener("click", () => {
         if (!aberto) return showToast("⛔ Restaurante fechado", "#ef4444");
         if (!cart.length) return;
-        window.open(`https://wa.me/${phone}`, "_blank");
+        const mensagem = gerarMensagemPedido();
+		window.open(`https://wa.me/${phone}?text=${mensagem}`, "_blank");
+
         cart = [];
         updateCartModal();
     });
