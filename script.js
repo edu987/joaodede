@@ -342,7 +342,7 @@ function updateCartModal() {
 
     cartCounter.textContent = cart.length;
 
-     // 🔥 garante funcionamento dos botões
+    bindCartButtons(); // 🔥 garante funcionamento dos botões
 }
 
 
