@@ -11,15 +11,10 @@ const addressInput = document.getElementById("address");
 const addressWarn = document.getElementById("address-warn");
 const aberturaHeader = document.getElementById("abertura");
 const encerramentoHeader = document.getElementById("fechamento");
-const modalInfo = document.getElementById("modal-info");
-const telefone = document.getElementById("telefone");
-const aberturaInfo = document.getElementById("time-abertura");
-const fechamentoInfo = document.getElementById("time-fechamento");
-const btnInfo = document.getElementById("btn-info");
 const banner = document.getElementById("cookie-banner");
 const acceptBtn = document.getElementById("accept-cookies-btn");
 const declineBtn = document.getElementById("decline-cookies-btn");
-const warnInfo = document.getElementById("warnInfo");
+
 
 // CONFIGURAÇÃO DO DONO (FIXO)
 const OWNER_PHONE = "5532988566505";
@@ -414,6 +409,14 @@ function showToast(message, backgroundColor) {
         style: { background: backgroundColor },
     }).showToast();
 }
+
+// Garante que o modal nunca apareça
+document.addEventListener("DOMContentLoaded", () => {
+    const modalInfo = document.getElementById("modal-info");
+    if (modalInfo) {
+        modalInfo.classList.add("hidden");
+    }
+});
 
 window.addEventListener("load", () => {
     updateTime(abertura, encerramento);
