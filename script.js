@@ -221,6 +221,46 @@ updateRestaurantStatus();
 setInterval(updateRestaurantStatus, 15000);
 
 // ===============================
+// EVENTOS DOS BOTÕES DO CARRINHO (+ - REMOVER)
+// ===============================
+if (cartItemsContainer) {
+    cartItemsContainer.addEventListener("click", (e) => {
+        const button = e.target.closest("button");
+        if (!button) return;
+
+        const name = button.dataset.name;
+        const item = cart.find(i => i.name === name);
+        if (!item) return;
+
+        // DIMINUIR QUANTIDADE
+        if (button.classList.contains("btn-remove")) {
+            if (item.quantity > 1) {
+                item.quantity--;
+            } else {
+                cart = cart.filter(i => i.name !== name);
+            }
+            updateCartModal();
+            return;
+        }
+
+        // AUMENTAR QUANTIDADE
+        if (button.classList.contains("btn-add")) {
+            item.quantity++;
+            updateCartModal();
+            return;
+        }
+
+        // REMOVER ITEM
+        if (button.classList.contains("remove-cart-btn")) {
+            cart = cart.filter(i => i.name !== name);
+            updateCartModal();
+            return;
+        }
+    });
+}
+
+
+// ===============================
 // CARRINHO
 // ===============================
 if (cartBtn && cartModal) {
