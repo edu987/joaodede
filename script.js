@@ -345,39 +345,82 @@ function updateCartModal() {
     bindCartButtons(); // 🔥 garante funcionamento dos botões
 }
 
-function gerarMensagemPedido() {
-    let mensagem = "🍔 *PEDIDO DO SITE* 🍔\n\n";
-    let total = 0;
-
-    cart.forEach(item => {
-        mensagem += `*${item.name}*\n`;
-        mensagem += `Quantidade: ${item.quantity}\n`;
-        mensagem += `R$ ${(item.price * item.quantity).toFixed(2)}\n`;
-        mensagem += "-------------------\n";
-        total += item.price * item.quantity;
-    });
-
-    mensagem += `\n*Total:* R$ ${total.toFixed(2)}\n`;
-
-    const obs = document.getElementById("observacao");
-    if (obs && obs.value.trim() !== "") {
-        mensagem += `\n*Adicionais:* ${obs.value}`;
-    }
-
-    return encodeURIComponent(mensagem);
-}
 
 
 if (checkoutBtn) {
     checkoutBtn.addEventListener("click", () => {
-        if (!aberto) return showToast("⛔ Restaurante fechado", "#ef4444");
-        if (!cart.length) return;
-        const mensagem = gerarMensagemPedido();
-		window.open(`https://wa.me/${phone}?text=${mensagem}`, "_blank");
 
-        cart = [];
-        updateCartModal();
-    });
+		// 🔒 Verifica horário configurado
+		if (!abertura || !fechamento) {
+			showToast("Horário do restaurante não configurado", "#ef4444");
+			return;
+		}
+
+		// ⏰ Verifica se está aberto
+		const agora = new Date();
+		const agoraMin = agora.getHours() * 60 + agora.getMinutes();
+
+		const [ah, am] = abertura.split(":").map(Number);
+		const [fh, fm] = fechamento.split(":").map(Number);
+
+		const aberturaMin = ah * 60 + am;
+		const fechamentoMin = fh * 60 + fm;
+
+		if (!restauranteAberto(agoraMin, aberturaMin, fechamentoMin)) {
+			showToast("⛔ Restaurante fechado", "#ef4444");
+			return;
+		}
+
+		// 🛒 Carrinho vazio
+		if (cart.length === 0) {
+			addressWarn.textContent = "Carrinho está vazio!";
+			addressWarn.classList.remove("hidden");
+			return;
+		}
+
+		addressWarn.classList.add("hidden");
+
+		// 📦 MONTA MENSAGEM (IGUAL AO ANTIGO)
+		let mensagem = "";
+
+		cart.forEach(item => {
+			mensagem += `${item.name}\n`;
+			mensagem += `quantidade: ${item.quantity}\n`;
+			mensagem += `R$ ${(item.price * item.quantity).toFixed(2)}\n`;
+			mensagem += `-------------------\n`;
+		});
+
+		const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+		mensagem += `\nTotal: R$ ${total.toFixed(2)}\n`;
+
+		if (addressInput && addressInput.value.trim() !== "") {
+			mensagem += `Adicionais: ${addressInput.value}`;
+		}
+
+		// 📞 Telefone válido
+		if (!phone) {
+			addressWarn.textContent = "Número de telefone não configurado!";
+			addressWarn.classList.remove("hidden");
+			return;
+		}
+
+		// 📲 Abre WhatsApp COM mensagem
+		window.open(
+			`https://wa.me/${phone}?text=${encodeURIComponent(mensagem)}`,
+			"_blank"
+		);
+
+		// 🧹 Limpa tudo
+		cart = [];
+		if (addressInput) addressInput.value = "";
+		updateCartModal();
+
+		// 🔒 Anti-clique duplo
+		checkoutBtn.disabled = true;
+		setTimeout(() => (checkoutBtn.disabled = false), 3000);
+	});
+
 }
 
 // ===============================
